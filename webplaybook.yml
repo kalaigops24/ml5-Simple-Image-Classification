@@ -1,0 +1,38 @@
+---
+- name: Download Tomcat8 from tomcat.apache.org
+  hosts: node
+    #  become: yes
+    #  become_method: sudo
+    #  remote_user: ubuntu
+  tasks:
+    - name: Update and upgrade apt packages
+      yum:
+        # upgrade: yes
+        #update_cache: yes
+        #cache_valid_time: 86400
+        name: "*"
+        state: latest
+    - name: Nginx install
+      yum:
+        name: nginx
+        state: present
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+
+    - name: copy the code to target server
+       ansible.builtin.copy:
+        src: /home/ec2-user/jenkins-node/workspace/ansible-pipeline/web.zip
+        dest: /home/ec2-user/web.zip
+
+    - name: Unarchive a file that is already on the remote machine
+        ansible.builtin.unarchive:
+          src: /home/ec2-user/web.zip
+          dest: /usr/share/nginx/html/
+          remote_src: yes
+
+    - name: start nginx
+      service:
+        name: nginx
+        state: restarted
